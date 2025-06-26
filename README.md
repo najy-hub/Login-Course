@@ -75,7 +75,7 @@
       }
 
       // Google Apps Script endpoint
-      const url = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
+      const url = "https://script.google.com/macros/s/AKfycbxJ-QDMobsLNVuIuMfR-AsuqAfah0plhurFsKptZct0abIAPkm38zXZm6WCjc1OPeZQnw/exec?username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
 
       try {
         const res = await fetch(url);
