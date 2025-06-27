@@ -78,7 +78,7 @@
       }
 
       // Google Apps Script endpoint
-      const url = "https://script.google.com/macros/s/AKfycbw2tLL_uR9gSDhesSTKEvQFGtN3HErYgoj59qBALVRsa5IMeGmEDYOZM_ZmP-h5Dtyy2w/exec?username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
+      const url = "https://script.google.com/macros/s/AKfycbwR2a0VpIEYXY8W7WEt2VLYAm6zBZBB3DyKbA69dqJQgrXz0modAeRverkJyZ7b_m4Tww/exec?username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
 
       try {
         const res = await fetch(url);
