@@ -1,98 +1,103 @@
-<!-- صفحة تسجيل دخول بسيطة -->
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تسجيل دخول المتدربين</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول - رحلة المهندس المحترف</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Cairo', sans-serif;
-      background-color: #111;
+      background: #111;
       color: #fff;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       margin: 0;
     }
-    .login-container {
-      background-color: #222;
+
+    form {
+      background: #1e1e1e;
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-      max-width: 400px;
+      border-radius: 10px;
       width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+
     input {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
       border: none;
-      border-radius: 8px;
-      background-color: #333;
+      background: #2c2c2c;
       color: #fff;
     }
+
     button {
       width: 100%;
       padding: 12px;
-      background-color: #ffc107;
+      background: #ffc107;
       color: #000;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
     }
-    .error {
-      color: red;
-      margin-bottom: 10px;
+
+    a {
+      color: #09f;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    p {
+      margin-top: 15px;
       text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>تسجيل الدخول</h2>
-    <div class="error" id="error"></div>
-    <input type="text" id="username" placeholder="اسم المستخدم">
-    <input type="password" id="password" placeholder="كلمة المرور">
-    <button onclick="login()">دخول</button>
-    <p style="text-align:center">
-  <a href="reset.html" style="color:#09f">هل نسيت كلمة المرور؟</a>
-</p>
 
-  </div>
+  <!-- ✅ مكان إدخال الكود هنا داخل البودي -->
+  <form onsubmit="login(event)">
+    <input type="text" id="username" placeholder="اسم المستخدم" required />
+    <input type="password" id="password" placeholder="كلمة المرور" required />
+    <button type="submit">دخول</button>
+    <p style="text-align:center">
+      <a href="reset.html">هل نسيت كلمة المرور؟</a>
+    </p>
+  </form>
 
   <script>
-    async function login() {
+    const scriptURL = "https://script.google.com/macros/s/XXX/exec"; // 🔁 استبدل XXX بالرابط الفعلي
+
+    function login(e) {
+      e.preventDefault();
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
-      const error = document.getElementById("error");
 
-      if (!username || !password) {
-        error.textContent = "يرجى إدخال اسم المستخدم وكلمة المرور";
-        return;
-      }
-
-      // Google Apps Script endpoint
-      const url = "https://script.google.com/macros/s/AKfycbw_wIagQpOVnvFeZgBAixV3pfz4GNu6YsPkRN6flk2cpbvaqaLval_FqnD0KHOZXQHX/exec?username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
-
-      try {
-        const res = await fetch(url);
-        const result = await res.json();
-
-        if (result.success) {
-          window.location.href = result.redirectUrl; // مثل صفحة الدورة التدريبية
-        } else {
-          error.textContent = "اسم المستخدم أو كلمة المرور غير صحيحة";
-        }
-      } catch (err) {
-        error.textContent = "حدث خطأ أثناء الاتصال بالخادم";
-      }
+      fetch(`${scriptURL}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            localStorage.setItem("courseStartDate", data.startDate);
+            location.href = data.redirectUrl;
+          } else {
+            alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+          }
+        })
+        .catch(err => {
+          alert("⚠️ حدث خطأ أثناء الاتصال بالخادم");
+          console.error(err);
+        });
     }
   </script>
+
 </body>
 </html>
