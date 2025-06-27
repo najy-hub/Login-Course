@@ -75,7 +75,7 @@
   </form>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzC4_aM_7qiZ_xlO450JWUXnsSSHzuV4kRhfZENskgCtj8GR1QpfJ7jAe4Ah4TvGMj9Tg/exec"; // 🔁 استبدل XXX بالرابط الفعلي
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyvrIRfHUImN0r9Pa0-Iu06frIAXSmXgBmDQ2ULSmmBo-7keYVobGr8UrXXVm_m2UtHfg/exec"; // 🔁 استبدل XXX بالرابط الفعلي
 
     function login(e) {
       e.preventDefault();
