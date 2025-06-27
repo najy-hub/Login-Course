@@ -86,6 +86,7 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
+            localStorage.setItem("loggedIn", "true");
             localStorage.setItem("courseStartDate", data.startDate);
             location.href = data.redirectUrl;
           } else {
