@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إعادة تعيين كلمة المرور</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: 'Cairo', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    form {
+      background: #222;
+      padding: 20px;
+      border-radius: 12px;
+      width: 300px;
+    }
+    input, button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+    }
+    input {
+      background: #333;
+      color: #fff;
+    }
+    button {
+      background: #ffc107;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .status {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <form id="resetForm">
+    <h2 style="text-align:center">إعادة تعيين كلمة المرور</h2>
+    <input type="text" name="username" placeholder="اسم المستخدم" required />
+    <input type="email" name="email" placeholder="البريد الإلكتروني" required />
+    <input type="password" name="newPassword" placeholder="كلمة المرور الجديدة" required />
+    <button type="submit">إعادة التعيين</button>
+    <div class="status" id="status"></div>
+  </form>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwR2a0VpIEYXY8W7WEt2VLYAm6zBZBB3DyKbA69dqJQgrXz0modAeRverkJyZ7b_m4Tww/exec"; // ضع رابط السكربت هنا
+
+    document.getElementById("resetForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const params = new URLSearchParams(formData).toString();
+
+      const res = await fetch(scriptURL, {
+        method: "POST",
+        body: params,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      });
+      const result = await res.json();
+      const status = document.getElementById("status");
+
+      if (result.success) {
+        status.textContent = "✅ تم تحديث كلمة المرور بنجاح!";
+        status.style.color = "#0f0";
+      } else {
+        status.textContent = "❌ " + (result.error || "حدث خطأ");
+        status.style.color = "#f33";
+      }
+    });
+  </script>
+</body>
+</html>
