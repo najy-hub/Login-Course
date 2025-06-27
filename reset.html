@@ -4,79 +4,114 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>إعادة تعيين كلمة المرور</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
+      font-family: 'Cairo', sans-serif;
       background: #111;
       color: #fff;
-      font-family: 'Cairo', sans-serif;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       margin: 0;
     }
-    form {
-      background: #222;
-      padding: 20px;
-      border-radius: 12px;
-      width: 300px;
-    }
-    input, button {
+
+    form, #codeSection {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
       width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
+
     input {
-      background: #333;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      background: #2c2c2c;
       color: #fff;
     }
+
     button {
+      width: 100%;
+      padding: 12px;
       background: #ffc107;
+      color: #000;
+      border: none;
+      border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
     }
-    .status {
+
+    h2 {
       text-align: center;
-      margin-top: 10px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <form id="resetForm">
-    <h2 style="text-align:center">إعادة تعيين كلمة المرور</h2>
-    <input type="text" name="username" placeholder="اسم المستخدم" required />
-    <input type="email" name="email" placeholder="البريد الإلكتروني" required />
-    <input type="password" name="newPassword" placeholder="كلمة المرور الجديدة" required />
-    <button type="submit">إعادة التعيين</button>
-    <div class="status" id="status"></div>
+
+  <!-- ✅ النموذج الأول لطلب كود التفعيل -->
+  <form onsubmit="requestReset(event)">
+    <h2>إعادة تعيين كلمة المرور</h2>
+    <input type="email" id="email" placeholder="البريد الإلكتروني" required />
+    <button type="submit">إرسال كود التفعيل</button>
   </form>
 
+  <!-- ✅ القسم الثاني لإدخال الكود وكلمة مرور جديدة -->
+  <div id="codeSection" style="display:none; margin-top: 20px;">
+    <input type="text" id="code" placeholder="أدخل كود التفعيل" required />
+    <input type="password" id="newpass" placeholder="كلمة مرور جديدة" required />
+    <button onclick="confirmReset()">تأكيد التغيير</button>
+  </div>
+
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbw_wIagQpOVnvFeZgBAixV3pfz4GNu6YsPkRN6flk2cpbvaqaLval_FqnD0KHOZXQHX/exec"; // ضع رابط السكربت هنا
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzC4_aM_7qiZ_xlO450JWUXnsSSHzuV4kRhfZENskgCtj8GR1QpfJ7jAe4Ah4TvGMj9Tg/exec"; // ✅ استبدل XXX بالرابط الصحيح
 
-    document.getElementById("resetForm").addEventListener("submit", async function(e) {
+    function requestReset(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      const params = new URLSearchParams(formData).toString();
+      const email = document.getElementById("email").value;
+      fetch(`${scriptURL}?reset=true&email=${encodeURIComponent(email)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("✅ تم إرسال كود إلى بريدك");
+            document.getElementById("codeSection").style.display = "block";
+          } else {
+            alert("❌ البريد غير موجود");
+          }
+        })
+        .catch(err => {
+          alert("⚠️ حدث خطأ أثناء الاتصال بالخادم");
+          console.error(err);
+        });
+    }
 
-      const res = await fetch(scriptURL, {
-        method: "POST",
-        body: params,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-      });
-      const result = await res.json();
-      const status = document.getElementById("status");
+    function confirmReset() {
+      const email = document.getElementById("email").value;
+      const code = document.getElementById("code").value;
+      const newpass = document.getElementById("newpass").value;
 
-      if (result.success) {
-        status.textContent = "✅ تم تحديث كلمة المرور بنجاح!";
-        status.style.color = "#0f0";
-      } else {
-        status.textContent = "❌ " + (result.error || "حدث خطأ");
-        status.style.color = "#f33";
-      }
-    });
+      fetch(`${scriptURL}?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}&newpass=${encodeURIComponent(newpass)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("✅ تم تحديث كلمة المرور بنجاح");
+            location.href = "login.html";
+          } else {
+            alert("❌ كود غير صحيح أو منتهي الصلاحية");
+          }
+        })
+        .catch(err => {
+          alert("⚠️ حدث خطأ أثناء إرسال البيانات");
+          console.error(err);
+        });
+    }
   </script>
+
 </body>
 </html>
