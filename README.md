@@ -60,6 +60,10 @@
     <input type="text" id="username" placeholder="اسم المستخدم">
     <input type="password" id="password" placeholder="كلمة المرور">
     <button onclick="login()">دخول</button>
+    <p style="text-align:center">
+  <a href="reset.html" style="color:#09f">هل نسيت كلمة المرور؟</a>
+</p>
+
   </div>
 
   <script>
