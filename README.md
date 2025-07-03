@@ -75,29 +75,31 @@
   </form>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbw2Ku6QKIpy8KZheZclEvg_tmaElEq-KQCcLy6_5P-vGxPx_8L5CadYGVLA3McYKcKZwQ/exec"; // 🔁 استبدل XXX بالرابط الفعلي
+const scriptURL = "https://script.google.com/macros/s/AKfycbw2Ku6QKIpy8KZheZclEvg_tmaElEq-KQCcLy6_5P-vGxPx_8L5CadYGVLA3McYKcKZwQ/exec";
 
-    function login(e) {
-      e.preventDefault();
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+function login(e) {
+  e.preventDefault();
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-      fetch(`${scriptURL}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("courseStartDate", data.startDate);
-            location.href = data.redirectUrl;
-          } else {
-            alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
-          }
-        })
-        .catch(err => {
-          alert("⚠️ حدث خطأ أثناء الاتصال بالخادم");
-          console.error(err);
-        });
-    }
+  fetch(`${scriptURL}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("studentEmail", data.username); // ✅ هذا هو السطر المهم
+        localStorage.setItem("courseStartDate", data.startDate);
+        location.href = data.redirectUrl;
+      } else {
+        alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+      }
+    })
+    .catch(err => {
+      alert("⚠️ حدث خطأ أثناء الاتصال بالخادم");
+      console.error(err);
+    });
+}
+
   </script>
 
 </body>
