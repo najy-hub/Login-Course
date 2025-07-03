@@ -87,9 +87,9 @@ function login(e) {
     .then(data => {
       if (data.success) {
         localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("studentEmail", data.username); // ✅ هذا هو السطر المهم
-        localStorage.setItem("courseStartDate", data.startDate);
-        location.href = data.redirectUrl;
+  localStorage.setItem("courseStartDate", data.startDate);
+  localStorage.setItem("studentEmail", data.username); // ✅ مهم جداً
+  location.href = data.redirectUrl;
       } else {
         alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
       }
