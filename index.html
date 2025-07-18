@@ -86,14 +86,12 @@ function login(e) {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        localStorage.setItem("loggedIn", "true");
+  localStorage.setItem("loggedIn", "true");
   localStorage.setItem("courseStartDate", data.startDate);
-  localStorage.setItem("username", data.username);        // اسم المستخدم الحقيقي
-localStorage.setItem("loggedIn", "true");
-localStorage.setItem("courseStartDate", data.startDate);
-
+  localStorage.setItem("username", username); // ✅ هذا هو المهم
   location.href = data.redirectUrl;
-      } else {
+}
+ else {
         alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
       }
     })
