@@ -88,7 +88,10 @@ function login(e) {
       if (data.success) {
         localStorage.setItem("loggedIn", "true");
   localStorage.setItem("courseStartDate", data.startDate);
-  localStorage.setItem("studentEmail", data.username); // ✅ مهم جداً
+  localStorage.setItem("username", data.username);        // اسم المستخدم الحقيقي
+localStorage.setItem("loggedIn", "true");
+localStorage.setItem("courseStartDate", data.startDate);
+
   location.href = data.redirectUrl;
       } else {
         alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
