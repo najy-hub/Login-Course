@@ -74,34 +74,28 @@
     </p>
   </form>
 
-  <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbw1V0U_gJd0w9RB3ekQCbVKzOVcSOBeRJk8xJ44t99bYO_kT15LEVjnoWyWWwDxg1alzg/exec";
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbw1V0U_gJd0w9RB3ekQCbVKzOVcSOBeRJk8xJ44t99bYO_kT15LEVjnoWyWWwDxg1alzg/exec";
 
-function login(e) {
-  e.preventDefault();
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+  function loginUser(username, password) {
+    fetch(`${scriptURL}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // ✅ بدلاً من استخدام localStorage
+          const redirectUrl = `https://course.najyacademia.com/?username=${encodeURIComponent(username)}&start=${encodeURIComponent(data.startDate)}`;
+          window.location.href = redirectUrl;
+        } else {
+          alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+        }
+      })
+      .catch(err => {
+        alert("⚠️ حدث خطأ أثناء الاتصال بالخادم");
+        console.error(err);
+      });
+  }
+</script>
 
-  fetch(`${scriptURL}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-  localStorage.setItem("loggedIn", "true");
-  localStorage.setItem("courseStartDate", data.startDate);
-  localStorage.setItem("username", username); // ✅ هذا هو المهم
-  location.href = data.redirectUrl;
-}
- else {
-        alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
-      }
-    })
-    .catch(err => {
-      alert("⚠️ حدث خطأ أثناء الاتصال بالخادم");
-      console.error(err);
-    });
-}
-
-  </script>
 
 </body>
 </html>
