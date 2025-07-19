@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل الدخول</title>
-    <!-- أضف مكتبة Firebase -->
+
+    <!-- مكتبات Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+
     <style>
-        /* نفس الأنماط السابقة */
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
@@ -86,40 +88,48 @@
             projectId: "solar-engineer-43cbc",
             storageBucket: "solar-engineer-43cbc.firebasestorage.app",
             messagingSenderId: "816573344174",
-            appId: "1:816573344174:web:b472b052d26b7be1d7003f"
+            appId: "1:816573344174:web:b472b052d26b7be1d7003f",
+            databaseURL: "https://solar-engineer-43cbc-default-rtdb.firebaseio.com"
         };
-        
-        // Initialize Firebase
+
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const database = firebase.database();
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
-            
+
             errorMsg.textContent = '';
-            
-            // تسجيل الدخول باستخدام Firebase
+
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // نجح تسجيل الدخول
                     const user = userCredential.user;
-                    
-                    // إنشاء token مخصص (اختياري)
-                    user.getIdToken().then((idToken) => {
-                        // توجيه المستخدم إلى صفحة الكورس مع token
-                        window.location.href = `http://course.najyacademia.com?token=${idToken}`;
+                    const userId = user.uid;
+
+                    const userRef = database.ref('users/' + userId);
+
+                    userRef.once('value').then((snapshot) => {
+                        if (!snapshot.hasChild('dripStartDate')) {
+                            const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+                            userRef.set({
+                                dripStartDate: today
+                            });
+                        }
+
+                        // بعد التأكد من الحفظ، توجيه المستخدم
+                        user.getIdToken().then((idToken) => {
+                            window.location.href = `http://course.najyacademia.com?token=${idToken}`;
+                        });
                     });
                 })
                 .catch((error) => {
-                    // فشل تسجيل الدخول
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    
-                    // عرض رسالة خطأ مناسبة بالعربية
+
                     if (errorCode === 'auth/wrong-password') {
                         errorMsg.textContent = 'كلمة المرور غير صحيحة';
                     } else if (errorCode === 'auth/user-not-found') {
