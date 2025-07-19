@@ -73,29 +73,39 @@
       <a href="reset.html">هل نسيت كلمة المرور؟</a>
     </p>
   </form>
-
 <script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbw1V0U_gJd0w9RB3ekQCbVKzOVcSOBeRJk8xJ44t99bYO_kT15LEVjnoWyWWwDxg1alzg/exec";
+  async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errorMessage = document.getElementById("error-message");
 
-  function loginUser(username, password) {
-    fetch(`${scriptURL}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          // ✅ بدلاً من استخدام localStorage
-          const redirectUrl = `https://course.najyacademia.com/?username=${encodeURIComponent(username)}&start=${encodeURIComponent(data.startDate)}`;
-          window.location.href = redirectUrl;
-        } else {
-          alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
-        }
-      })
-      .catch(err => {
-        alert("⚠️ حدث خطأ أثناء الاتصال بالخادم");
-        console.error(err);
-      });
+    if (!username || !password) {
+      errorMessage.textContent = "يرجى إدخال اسم المستخدم وكلمة المرور.";
+      return;
+    }
+
+    try {
+      const url = `https://script.google.com/macros/s/AKfycbweSOnyEh8WdSocu7wYylHud1l2gLP4mWr-G721_JkTuiM5rglkEWm0U5Gmoceh9NOItA/exec?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (result.success) {
+        // حفظ اسم المستخدم وتاريخ البداية في localStorage
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("studentEmail", result.username);
+        localStorage.setItem("courseStartDate", result.firstStartDate);
+
+        // التوجيه إلى صفحة الكورس
+        window.location.href = `https://course.najyacademia.com`;
+      } else {
+        errorMessage.textContent = result.error || "حدث خطأ أثناء تسجيل الدخول.";
+      }
+    } catch (err) {
+      errorMessage.textContent = "فشل الاتصال بالخادم.";
+      console.error(err);
+    }
   }
 </script>
-
 
 </body>
 </html>
