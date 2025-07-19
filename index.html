@@ -111,7 +111,7 @@
                     // إنشاء token مخصص (اختياري)
                     user.getIdToken().then((idToken) => {
                         // توجيه المستخدم إلى صفحة الكورس مع token
-                        window.location.href = `https://your-course-domain.com?token=${idToken}`;
+                        window.location.href = `http://course.najyacademia.com?token=${idToken}`;
                     });
                 })
                 .catch((error) => {
