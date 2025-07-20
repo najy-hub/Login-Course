@@ -77,7 +77,8 @@
             <div id="errorMsg" class="error"></div>
         </form>
     </div>
-
+// اضافت نسيان كلمة المرور
+    <a href="#" onclick="resetPassword()">نسيت كلمة المرور؟</a>
     <script>
         // تهيئة Firebase
         const firebaseConfig = {
@@ -129,6 +130,18 @@
                     }
                 });
         });
+        // ضفت فى حالة نسيان كلمة المرور
+        async function resetPassword() {
+    const email = prompt("أدخل بريدك الإلكتروني:");
+    if (email) {
+      try {
+        await auth.sendPasswordResetEmail(email);
+        alert("تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني");
+      } catch (error) {
+        alert("حدث خطأ: " + error.message);
+      }
+    }
+  }
     </script>
 </body>
 </html>
