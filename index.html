@@ -129,101 +129,101 @@
   <!-- الأجزاء الأخرى من HTML تبقى كما هي -->
 
   <script>
-    // الحل باستخدام JSONP لتجاوز مشكلة CORS
-    function handleLogin() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const errorElement = document.getElementById('errorMessage');
-      const submitBtn = document.querySelector('#loginForm button');
+  // 1. تعريف العناصر أولاً
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorElement = document.getElementById('errorMessage');
 
-      // التحقق من صحة المدخلات
-      if (!validateInputs(email, password)) return;
-
-      // إعداد حالة التحميل
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'جاري تسجيل الدخول...';
-      errorElement.style.display = 'none';
-
-      // إنشاء طلب JSONP
-      const script = document.createElement('script');
-      script.src = `https://script.google.com/macros/s/AKfycbxIt0E44kK1vrkMfMug-HiB5ovU4oBMyb_ZsKgipty5ATf-yHfXWmA_2KpfJ_YxHMpvTQ/exec?
-        action=login&
-        email=${encodeURIComponent(email)}&
-        password=${encodeURIComponent(password)}&
-        callback=handleLoginResponse`;
-      
-      // تعريف دالة معالجة الاستجابة
-      window.handleLoginResponse = function(response) {
-        try {
-          if (response.status === "FAILED") {
-            throw new Error(response.message || "فشل تسجيل الدخول");
-          }
-          
-          // حفظ بيانات المستخدم
-          saveUserData(response);
-          
-          // التوجيه إلى الصفحة الرئيسية
-          window.location.href = 'http://course.najyacademia.com/';
-        } catch (error) {
-          showError(error.message);
-        } finally {
-          cleanUp();
-        }
-      };
-
-      document.body.appendChild(script);
+    // 2. دالة تغيير حالة الزر
+    function setButtonState(loading) {
+      if (!submitBtn) {
+        console.error('عنصر submitBtn غير موجود');
+        return;
+      }
+      submitBtn.disabled = loading;
+      submitBtn.textContent = loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول';
     }
 
-    // دوال مساعدة
+    // 3. دالة تسجيل الدخول
+    async function login(email, password) {
+      try {
+        setButtonState(true);
+        errorElement.style.display = 'none';
+
+        // استخدام JSONP كحل بديل لـ CORS
+        const script = document.createElement('script');
+        script.src = `https://script.google.com/macros/s/AKfycbxIt0E44kK1vrkMfMug-HiB5ovU4oBMyb_ZsKgipty5ATf-yHfXWmA_2KpfJ_YxHMpvTQ/exec?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&callback=handleLoginResponse`;
+        
+        window.handleLoginResponse = function(response) {
+          try {
+            if (response.status === "FAILED") {
+              throw new Error(response.message || "بيانات الدخول غير صحيحة");
+            }
+
+            localStorage.setItem('userData', JSON.stringify({
+              email: response.email,
+              unlockedWeeks: response.unlockedWeeks || [1],
+              completedWeeks: response.completedWeeks || [],
+              currentWeek: response.currentWeek || 1
+            }));
+
+            window.location.href = 'http://course.najyacademia.com/';
+          } catch (error) {
+            console.error('Login error:', error);
+            errorElement.textContent = error.message || 'حدث خطأ أثناء تسجيل الدخول';
+            errorElement.style.display = 'block';
+          } finally {
+            setButtonState(false);
+            document.body.removeChild(script);
+            delete window.handleLoginResponse;
+          }
+        };
+
+        document.body.appendChild(script);
+
+      } catch (error) {
+        console.error("Login error:", error);
+        errorElement.textContent = 'حدث خطأ غير متوقع';
+        errorElement.style.display = 'block';
+        setButtonState(false);
+      }
+    }
+
+    // 4. التحقق من صحة المدخلات
     function validateInputs(email, password) {
-      const errorElement = document.getElementById('errorMessage');
-      
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showError('يرجى إدخال بريد إلكتروني صحيح');
+        errorElement.textContent = 'يرجى إدخال بريد إلكتروني صحيح';
+        errorElement.style.display = 'block';
         return false;
       }
       
       if (!password || password.length < 6) {
-        showError('كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل');
+        errorElement.textContent = 'كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل';
+        errorElement.style.display = 'block';
         return false;
       }
       
       return true;
     }
 
-    function saveUserData(userData) {
-      localStorage.setItem('userData', JSON.stringify({
-        email: userData.email,
-        unlockedWeeks: userData.unlockedWeeks || [1],
-        completedWeeks: userData.completedWeeks || [],
-        currentWeek: userData.currentWeek || 1
-      }));
+    // 5. إعداد مستمع الأحداث
+    if (loginForm && submitBtn) {
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        
+        if (validateInputs(email, password)) {
+          login(email, password);
+        }
+      });
+    } else {
+      console.error('لم يتم العثور على عناصر DOM المطلوبة');
     }
 
-    function showError(message) {
-      const errorElement = document.getElementById('errorMessage');
-      const submitBtn = document.querySelector('#loginForm button');
-      
-      errorElement.textContent = message;
-      errorElement.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'تسجيل الدخول';
-    }
-
-    function cleanUp() {
-      // تنظيف الموارد
-      const script = document.querySelector('script[src*="macros"]');
-      if (script) document.body.removeChild(script);
-      delete window.handleLoginResponse;
-    }
-
-    // إعداد مستمع الأحداث
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      handleLogin();
-    });
-
-    // التحقق من تسجيل الدخول عند التحميل
+    // 6. التحقق من تسجيل الدخول عند التحميل
     window.addEventListener('DOMContentLoaded', function() {
       if (localStorage.getItem('userData')) {
         window.location.href = 'http://course.najyacademia.com/';
