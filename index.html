@@ -131,19 +131,11 @@ async function login(email, password) {
     submitBtn.textContent = 'جاري تسجيل الدخول...';
     errorElement.style.display = 'none';
 
-    // إرسال طلب تسجيل الدخول
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        action: 'login',
-        email: email,
-        password: password
-      }),
-      credentials: 'same-origin'
-    });
+   // استخدام proxy أو تغيير طريقة الإرسال
+        const response = await fetch(`${API_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
+          method: 'GET', // تغيير إلى GET لتفادي CORS
+          redirect: 'follow'
+        });
 
     // التحقق من حالة الاستجابة
     if (!response.ok) {
@@ -151,12 +143,12 @@ async function login(email, password) {
       throw new Error(errorData.message || `خطأ في الخادم: ${response.status}`);
     }
 
-    // معالجة الاستجابة
-    const responseData = await response.json();
-    
-    if (responseData.status === "FAILED") {
-      throw new Error(responseData.message || "بيانات الدخول غير صحيحة");
-    }
+   // معالجة الاستجابة
+        const data = await response.json();
+        
+        if (data.status === "FAILED") {
+          throw new Error(data.message || "بيانات الدخول غير صحيحة");
+        }
 
     // حفظ بيانات المستخدم
     localStorage.setItem('userData', JSON.stringify({
