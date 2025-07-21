@@ -172,17 +172,61 @@
       try {
         setButtonState(true);
         
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            action: 'login',
-            email: email,
-            password: password
-          })
-        });
+        async function login(email, password) {
+  try {
+    setButtonState(true);
+    
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        action: 'login',
+        email: email,
+        password: password
+      })
+    });
+    
+    // التحقق من حالة الاستجابة أولاً
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+    
+    // محاولة قراءة النص أولاً لتفادي مشاكل JSON
+    const responseText = await response.text();
+    let userData;
+    
+    try {
+      userData = responseText ? JSON.parse(responseText) : {};
+    } catch (e) {
+      console.error('Failed to parse JSON:', responseText);
+      throw new Error('استجابة غير صالحة من الخادم');
+    }
+    
+    if (userData.status === "FAILED" || !userData.email) {
+      throw new Error(userData.message || "بيانات الدخول غير صحيحة");
+    }
+    
+    // حفظ بيانات المستخدم
+    localStorage.setItem('userData', JSON.stringify({
+      email: userData.email,
+      name: userData.name,
+      unlockedWeeks: userData.unlockedWeeks || [1],
+      completedWeeks: userData.completedWeeks || [],
+      currentWeek: userData.currentWeek || 1,
+      token: userData.token
+    }));
+    
+    window.location.href = 'http://course.najyacademia.com/';
+    
+  } catch (error) {
+    console.error("Login error:", error);
+    showError(error.message || 'حدث خطأ أثناء تسجيل الدخول');
+  } finally {
+    setButtonState(false);
+  }
+}
         
         if (!response.ok) {
           throw new Error('فشل في الاتصال بالخادم');
