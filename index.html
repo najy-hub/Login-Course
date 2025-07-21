@@ -119,103 +119,76 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxIt0E44kK1vrkMfMug-HiB5ovU4oBMyb_ZsKgipty5ATf-yHfXWmA_2KpfJ_YxHMpvTQ/exec';
- // دالة تسجيل الدخول المحسنة
-async function login(email, password) {
-  const submitBtn = document.querySelector('#loginForm button');
-  const errorElement = document.getElementById('errorMessage');
-  
-  try {
-    // إعداد واجهة المستخدم أثناء التحميل
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'جاري تسجيل الدخول...';
-    errorElement.style.display = 'none';
+     // 1. حل CORS باستخدام JSONP
+    function login(email, password) {
+      const submitBtn = document.querySelector('#loginForm button');
+      const errorElement = document.getElementById('errorMessage');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري تسجيل الدخول...';
+      errorElement.style.display = 'none';
 
-   // استخدام proxy أو تغيير طريقة الإرسال
-        const response = await fetch(`${API_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
-          method: 'GET', // تغيير إلى GET لتفادي CORS
-          redirect: 'follow'
-        });
+      // إنشاء عنصر script لطريقة JSONP
+      const script = document.createElement('script');
+      script.src = `https://script.google.com/macros/s/AKfycbxIt0E44kK1vrkMfMug-HiB5ovU4oBMyb_ZsKgipty5ATf-yHfXWmA_2KpfJ_YxHMpvTQ/exec?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&callback=handleLoginResponse`;
+      
+      // دالة معالجة الاستجابة
+      window.handleLoginResponse = function(data) {
+        try {
+          if (data.status === "FAILED") {
+            throw new Error(data.message || "بيانات الدخول غير صحيحة");
+          }
 
-    // التحقق من حالة الاستجابة
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `خطأ في الخادم: ${response.status}`);
+          localStorage.setItem('userData', JSON.stringify({
+            email: data.email,
+            unlockedWeeks: data.unlockedWeeks || [1],
+            completedWeeks: data.completedWeeks || [],
+            currentWeek: data.currentWeek || 1
+          }));
+
+          window.location.href = 'http://course.najyacademia.com/';
+        } catch (error) {
+          console.error('Login error:', error);
+          errorElement.textContent = error.message || 'حدث خطأ أثناء تسجيل الدخول';
+          errorElement.style.display = 'block';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'تسجيل الدخول';
+          document.body.removeChild(script);
+          delete window.handleLoginResponse;
+        }
+      };
+
+      document.body.appendChild(script);
     }
 
-   // معالجة الاستجابة
-        const data = await response.json();
-        
-        if (data.status === "FAILED") {
-          throw new Error(data.message || "بيانات الدخول غير صحيحة");
-        }
+    // 2. مستمع حدث التسجيل
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('errorMessage').textContent = 'يرجى إخال بريد إلكتروني صحيح';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      }
+      
+      if (!password || password.length < 6) {
+        document.getElementById('errorMessage').textContent = 'كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      }
+      
+      login(email, password);
+    });
 
-    // حفظ بيانات المستخدم
-    localStorage.setItem('userData', JSON.stringify({
-      email: responseData.email,
-      unlockedWeeks: responseData.unlockedWeeks || [1],
-      completedWeeks: responseData.completedWeeks || [],
-      currentWeek: responseData.currentWeek || 1,
-      token: responseData.token || null
-    }));
-
-    // توجيه المستخدم بعد تسجيل الدخول
-    window.location.href = 'http://course.najyacademia.com/';
-
-  } catch (error) {
-    console.error('Login error:', error);
-    
-    // عرض رسالة الخطأ المناسبة
-    const errorMessages = {
-      'Failed to fetch': 'تعذر الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت',
-      'Network request failed': 'مشكلة في الشبكة. يرجى المحاولة مرة أخرى',
-      '500': 'خطأ في الخادم الداخلي. يرجى المحاولة لاحقاً'
-    };
-    
-    errorElement.textContent = errorMessages[error.message] || error.message || 'حدث خطأ غير متوقع';
-    errorElement.style.display = 'block';
-
-    // إعادة تفعيل الحقول لتصحيح البيانات
-    document.getElementById('email').value = email;
-    document.getElementById('password').value = password;
-    
-  } finally {
-    // إعادة تعيين حالة الزر
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'تسجيل الدخول';
-  }
-}
-
-// إعداد مستمع حدث التسجيل
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-
-  // التحقق من صحة المدخلات
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    document.getElementById('errorMessage').textContent = 'يرجى إدخال بريد إلكتروني صحيح';
-    document.getElementById('errorMessage').style.display = 'block';
-    return;
-  }
-
-  if (!password || password.length < 6) {
-    document.getElementById('errorMessage').textContent = 'كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل';
-    document.getElementById('errorMessage').style.display = 'block';
-    return;
-  }
-
-  // استدعاء دالة تسجيل الدخول
-  await login(email, password);
-});
-
-// التحقق من تسجيل الدخول عند تحميل الصفحة
-window.addEventListener('load', function() {
-  if (localStorage.getItem('userData')) {
-    window.location.href = 'http://course.najyacademia.com/';
-  }
-});
+    // 3. التحقق من تسجيل الدخول عند التحميل
+    window.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('userData')) {
+        window.location.href = 'http://course.najyacademia.com/';
+      }
+    });
     </script>
 </body>
 </html>
